@@ -7,7 +7,7 @@ import {
 	query,
 	limitToFirst,
 } from "firebase/database";
-import { StoryInterface } from "../types";
+import { CommentInterface, StoryInterface } from "../types";
 
 const firebaseConfig = {
 	databaseURL: "https://hacker-news.firebaseio.com",
@@ -18,27 +18,27 @@ export default function useHackerNews() {
 	const database = ref(getDatabase(app));
 
 	const getTopStories = async (limit: number): Promise<StoryInterface[]> => {
-		return fetchStories("topstories", limit);
+		return fetchStories("top", limit);
 	};
 
 	const getNewStories = async (limit: number): Promise<StoryInterface[]> => {
-		return fetchStories("newstories", limit);
+		return fetchStories("new", limit);
 	};
 
 	const getBestStories = async (limit: number): Promise<StoryInterface[]> => {
-		return fetchStories("beststories", limit);
+		return fetchStories("best", limit);
 	};
 
 	const getAskStories = async (limit: number): Promise<StoryInterface[]> => {
-		return fetchStories("askstories", limit);
+		return fetchStories("ask", limit);
 	};
 
 	const getShowStories = async (limit: number): Promise<StoryInterface[]> => {
-		return fetchStories("showstories", limit);
+		return fetchStories("show", limit);
 	};
 
 	const getJobStories = async (limit: number): Promise<StoryInterface[]> => {
-		return fetchStories("jobstories", limit);
+		return fetchStories("job", limit);
 	};
 
 	const fetchStory = async (storyId): Promise<StoryInterface> => {
@@ -57,7 +57,7 @@ export default function useHackerNews() {
 
 	const fetchStories = async (type, limit = 10): Promise<StoryInterface[]> => {
 		const items = await get(
-			query(child(database, "v0/" + type), limitToFirst(limit)),
+			query(child(database, `v0/${type}stories`), limitToFirst(limit)),
 		).catch((error) => {
 			console.error(error);
 		});
@@ -81,13 +81,28 @@ export default function useHackerNews() {
 		}
 	};
 
+  const fetchKids = async (kids: number[]): Promise<CommentInterface[]> => {
+    const promises = kids.map(async (id) => {
+      const item = await get(child(database, `v0/item/${id}`)).catch(
+        (error) => {
+          console.error(error);
+        },
+      );
+
+      if (item?.exists()) {
+        let comment = item.val();
+
+        return comment;
+      }
+    });
+
+    return await Promise.all(promises);
+  }
+
 	return {
 		getTopStories,
-		getNewStories,
-		getBestStories,
-		getAskStories,
-		getShowStories,
-		getJobStories,
+		fetchStories,
 		fetchStory,
+    fetchKids,
 	};
 }

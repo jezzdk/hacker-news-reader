@@ -1,119 +1,80 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import TopStories from "./src/pages/TopStories";
-import AskStories from "./src/pages/AskStories";
 import Story from "./src/pages/Story";
+import Settings from "./src/pages/Settings";
+import SettingsModal from "./src/pages/Settings";
+import Bookmarks from "./src/pages/Bookmarks";
+import Categories from "./src/pages/Categories";
 import { StatusBar } from "expo-status-bar";
-import { Button, Text, View, StyleSheet } from "react-native";
-import { useColorScheme } from "nativewind";
-import { Cog6ToothIcon, NewspaperIcon, QuestionMarkCircleIcon } from "react-native-heroicons/outline";
+import { StyleSheet, Text } from "react-native";
+import { BookmarkIcon, Cog6ToothIcon, NewspaperIcon, TagIcon } from "react-native-heroicons/outline";
+import Stories from "./src/pages/Stories";
+import TopStories from "./src/pages/Stories";
 
 const RootStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
-
-function StoriesScreen() {
-	return (
-		<Stack.Navigator initialRouteName="Latest">
-			<Stack.Screen
-				name="Latest"
-				component={TopStories}
-				options={{
-					title: "Latest Stories",
-					headerStyle: {
-						backgroundColor: styles.header.backgroundColor,
-					},
-					headerTintColor: styles.header.color,
-					headerTitleStyle: {
-						fontWeight: styles.header.fontWeight,
-					},
-				}}
-			/>
-		</Stack.Navigator>
-	);
-}
-
-function AskHnScreen() {
-	return (
-		<Stack.Navigator initialRouteName="AskHn">
-			<Stack.Screen
-				name="AskHn"
-				component={AskStories}
-				options={{
-					title: "Ask HN",
-					headerStyle: {
-						backgroundColor: styles.header.backgroundColor,
-					},
-					headerTintColor: styles.header.color,
-					headerTitleStyle: {
-						fontWeight: styles.header.fontWeight,
-					},
-				}}
-			/>
-		</Stack.Navigator>
-	);
-}
+const CategoriesStack = createNativeStackNavigator();
 
 function MainScreen() {
 	return (
 		<Tab.Navigator
+      initialRouteName="Stories"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           if (route.name === 'TopStories') {
             return <NewspaperIcon color={color} size={24} />
-          } else if (route.name === 'AskStories') {
-            return <QuestionMarkCircleIcon color={color} size={24} />
-          } else if (route.name === 'SettingsScreen') {
+          } else if (route.name === 'CategoriesScreen') {
+            return <TagIcon color={color} size={24} />
+          } else if (route.name === 'Bookmarks') {
+            return <BookmarkIcon color={color} size={24} />
+          } else if (route.name === 'Settings') {
             return <Cog6ToothIcon color={color} size={24} />
           }
         },
         tabBarActiveTintColor: '#ff6600',
         tabBarInactiveTintColor: 'gray',
+        tabBarLabel(props) {
+          if (route.name === 'CategoriesScreen') {
+            return <Text className={["text-xs", props.focused ? "text-accent" : "text-gray-500"].join(" ")}>Categories</Text>;
+          } else if (route.name === 'TopStories') {
+            return <Text className={["text-xs", props.focused ? "text-accent" : "text-gray-500"].join(" ")}>Top Stories</Text>;
+          }
+
+          return <Text className={["text-xs", props.focused ? "text-accent" : "text-gray-500"].join(" ")}>{route.name}</Text>;
+        },
       })}
     >
 			<Tab.Screen
-				name="TopStories"
-				component={TopStories}
-				options={{ headerShown: false, title: "Top Stories" }}
+				name="CategoriesScreen"
+				component={CategoriesScreen}
+				options={{ headerShown: false }}
+
 			/>
 			<Tab.Screen
-				name="AskStories"
-				component={AskStories}
+				name="TopStories"
+				component={TopStories}
 				options={{ headerShown: false }}
 			/>
-			<Tab.Screen name="SettingsScreen" component={SettingsScreen} />
+      <Tab.Screen
+				name="Bookmarks"
+				component={Bookmarks}
+				options={{ headerShown: false }}
+			/>
 		</Tab.Navigator>
 	);
 }
 
-function SettingsScreen() {
-	const { colorScheme, setColorScheme } = useColorScheme();
-
-	return (
-		<View className="flex-1 items-center justify-center dark:bg-gray-800">
-			<Text className="text-gray-900 dark:text-white">Settings Screen</Text>
-			<Text
-				className="text-gray-900 dark:text-white"
-				onPress={() =>
-					setColorScheme(colorScheme === "light" ? "dark" : "light")
-				}
-			>
-				{`The color scheme is ${colorScheme}`}
-			</Text>
-		</View>
-	);
-}
-
-function SettingsModal({ navigation }) {
-	const { colorScheme } = useColorScheme();
-	return (
-		<View className="flex-1 items-center justify-center">
-			<Text>Settings Modal</Text>
-			<Text>{`The color scheme is ${colorScheme}`}</Text>
-			<Button onPress={() => navigation.goBack()} title="Dismiss" />
-		</View>
-	);
+function CategoriesScreen() {
+  return (
+    <CategoriesStack.Navigator
+      initialRouteName="Stories"
+      screenOptions={{ headerShown: false }}
+    >
+      <CategoriesStack.Screen name="Categories" component={Categories} />
+      <CategoriesStack.Screen name="Stories" component={Stories} />
+    </CategoriesStack.Navigator>
+  );
 }
 
 export default function App() {
@@ -140,6 +101,7 @@ export default function App() {
 							headerBackTitle: "Back",
 						}}
 					/>
+          <RootStack.Screen name="Settings" component={Settings} />
 				</RootStack.Group>
 				<RootStack.Group screenOptions={{ presentation: "modal" }}>
 					<RootStack.Screen name="SettingsModal" component={SettingsModal} />

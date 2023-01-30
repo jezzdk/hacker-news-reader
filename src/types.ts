@@ -31,3 +31,16 @@ export interface UserInterface {
 	about?: string;
 	submitted?: number[];
 }
+
+export interface CommentInterface {
+  id: number;
+  deleted?: boolean;
+  by: string;
+  parent: number | null;
+  text: string;
+  dead?: boolean;
+  replies?: CommentInterface[];
+  kids: number[];
+  time: number;
+  type: string;
+}

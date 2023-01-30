@@ -17,16 +17,18 @@ import Header from "../components/Header";
 
 dayjs.extend(relativeTime);
 
-export default function AskStories({ navigation }) {
+export default function Stories({ route, navigation }) {
 	const [loading, setLoading] = useState(true);
 	const [loadingMore, setLoadingMore] = useState(false);
 	const [stories, setStories] = useState<StoryInterface[]>([]);
 	const [limit, setLimit] = useState<number>(5);
-	const { getAskStories } = useHackerNews();
+	const { fetchStories } = useHackerNews();
 	const wait = useWait();
 
+  const { type } = route?.params ?? { type: "top" };
+
 	const fetch = async (limit: number) => {
-		let items = await getAskStories(limit);
+		let items = await fetchStories(type ?? "top", limit);
 
 		if (items) {
 			setStories(items);
@@ -56,9 +58,9 @@ export default function AskStories({ navigation }) {
 
 	return (
 		<View className="flex-1">
-			<Header title="Ask HN" navigation={navigation} />
+			<Header title={`${type} Stories`} navigation={navigation} showBackButton={route.params?.showBackButton} />
 			<ScrollView
-				className="flex-1 bg-white text-gray-900 dark:bg-gray-700 dark:text-white"
+				className="flex-1 bg-white text-gray-900 dark:bg-gray-900 dark:text-white"
 				refreshControl={
 					<RefreshControl refreshing={loading} onRefresh={onRefresh} />
 				}
@@ -69,7 +71,7 @@ export default function AskStories({ navigation }) {
 							<Pressable
 								key={story.id}
 								onPress={() => navigation.navigate("Story", { id: story.id })}
-								className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white hover:bg-violet-100 active:bg-violet-100 dark:bg-gray-900"
+								className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white hover:bg-gray-100 active:bg-gray-100 dark:bg-gray-900"
 							>
 								<StoryListItem story={story} index={index} />
 							</Pressable>
@@ -77,9 +79,9 @@ export default function AskStories({ navigation }) {
 						<View className="flex flex-row justify-center py-10">
 							<Pressable
 								onPress={() => loadMore()}
-								className="border border-gray-400 px-4 py-2 rounded-lg hover:bg-gray-100 active:bg-gray-100"
+								className="border border-gray-500 px-4 py-2 rounded-full hover:bg-gray-100 active:bg-gray-100"
 							>
-								{loadingMore ? <Text>Loading...</Text> : <Text>Load more</Text>}
+								{loadingMore ? <Text className="text-gray-900 dark:text-gray-100">Loading...</Text> : <Text className="text-gray-900 dark:text-gray-100">Load more</Text>}
 							</Pressable>
 						</View>
 					</View>

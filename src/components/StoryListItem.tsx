@@ -13,7 +13,7 @@ export default function StoryListItem({story, index}: {story: StoryInterface, in
 				<View className="mb-2">
 					<Text className="text-base font-bold text-gray-900 dark:text-gray-100">
 						{story.title}{" "}
-						<Text className="text-xs font-normal">
+						<Text className="text-xs font-normal whitespace-nowrap">
 							({dayjs(story.time * 1000).fromNow()})
 						</Text>
 					</Text>

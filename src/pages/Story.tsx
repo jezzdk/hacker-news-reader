@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { StoryInterface } from "../types";
+import { CommentInterface, StoryInterface } from "../types";
 import {
   Linking,
 	Pressable,
@@ -13,6 +13,8 @@ import useHackerNews from "../hooks/useHackerNews";
 import useWait from "../hooks/useWait";
 import StoryHeader from "../components/StoryHeader";
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
 	ChatBubbleBottomCenterIcon,
 	StarIcon,
 	UserIcon,
@@ -20,11 +22,13 @@ import {
 import {
 	ArrowTopRightOnSquareIcon,
 } from "react-native-heroicons/solid";
+import Comment from "../components/Comment";
 
 export default function Story({ route, navigation }) {
 	const [loading, setLoading] = useState(true);
 	const [story, setStory] = useState<StoryInterface>();
-	const { fetchStory } = useHackerNews();
+  const [comments, setComments] = useState<CommentInterface[]>();
+	const { fetchStory, fetchKids } = useHackerNews();
 	const wait = useWait();
 
 	const fetch = async () => {
@@ -36,21 +40,36 @@ export default function Story({ route, navigation }) {
 		}
 	};
 
+  const fetchComments = async () => {
+		let items = await fetchKids(story.kids);
+
+		if (items) {
+			setComments(items);
+			setLoading(false);
+		}
+	};
+
 	useEffect(() => {
 		fetch();
 	}, []);
+
+  useEffect(() => {
+    if (story && story.kids?.length > 0 && !comments) {
+      fetchComments();
+    }
+	}, [story]);
 
 	const onRefresh = useCallback(() => {
 		setLoading(true);
 
 		wait(2000).then(async () => {
-			fetch();
+			await fetch();
 		});
 	}, []);
 
 	return (
 		<View className="flex-1 items-center bg-white dark:bg-gray-900">
-			<StoryHeader title="Story" navigation={navigation} />
+			<StoryHeader title="" navigation={navigation} />
 			<ScrollView
 				className="flex-1"
 				refreshControl={
@@ -95,18 +114,43 @@ export default function Story({ route, navigation }) {
 								</View>
 							</View>
 						</View>
-						<Text>{story?.text}</Text>
+            <View className="py-4">
+						  <Text className="text-gray-900 dark:text-gray-100">{story?.text}</Text>
+            </View>
+            <Pressable onPress={() => Linking.openURL(`https://news.ycombinator.com/item?id=${story.id}`)} className="py-4 flex flex-row items-center gap-2">
+						  <Text className="underline text-gray-900 dark:text-gray-100">View story on Hacker News</Text>
+              <ArrowTopRightOnSquareIcon color="#111827" size={14} />
+            </Pressable>
+            <View>
+              {comments?.map((comment: CommentInterface) => (
+                <Comment key={comment.id} comment={comment} level={1} />
+              ))}
+            </View>
 					</View>
 				)}
 			</ScrollView>
 			<View className="flex w-full p-4">
-				<Pressable onPress={() => Linking.openURL(story.url)} className="bg-accent rounded-lg py-3 w-full">
+				<Pressable onPress={() => Linking.openURL(story.url)} className="bg-accent rounded-full py-3 w-full">
 					<View className="flex flex-row items-center justify-center gap-3">
 						<Text className="text-base text-white">Visit link</Text>
 						<ArrowTopRightOnSquareIcon color="white" size={18} />
 					</View>
 				</Pressable>
 			</View>
+      {/* <View className="flex flex-row justify-between w-full p-4">
+        <Pressable onPress={() => Linking.openURL(story.url)} className="border border-gray-500 px-4 py-2 rounded-full hover:bg-gray-100 active:bg-gray-100">
+					<View className="flex flex-row items-center justify-center gap-3">
+						<ArrowLeftIcon color="#111827" size={18} />
+						<Text className="text-gray-900 dark:text-gray-100">Previous</Text>
+					</View>
+				</Pressable>
+				<Pressable onPress={() => Linking.openURL(story.url)} className="border border-gray-500 px-4 py-2 rounded-full hover:bg-gray-100 active:bg-gray-100">
+					<View className="flex flex-row items-center justify-center gap-3">
+						<Text className="text-gray-900 dark:text-gray-100">Next</Text>
+						<ArrowRightIcon color="#111827" size={18} />
+					</View>
+				</Pressable>
+			</View> */}
 		</View>
 	);
 }

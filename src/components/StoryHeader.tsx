@@ -13,10 +13,10 @@ export default function StoryHeader({
 				</Pressable>
 				<Text className="text-xl font-bold text-accent ml-4">{title}</Text>
         <View className="w-12 flex flex-row items-center gap-2">
-          {/* <Pressable onPress={() => alert("Coming soon!")}>
+          <Pressable onPress={() => alert("Coming soon!")}>
             <BookmarkIcon color="#6b7280" size={24} />
           </Pressable>
-          <Pressable onPress={() => alert("Coming soon!")}>
+          {/* <Pressable onPress={() => alert("Coming soon!")}>
             <BellIcon color="#6b7280" size={24} />
           </Pressable> */}
         </View>
